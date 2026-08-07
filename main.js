@@ -213,8 +213,7 @@ function parseMetaHapticFile(jsonText, fileName = 'custom.haptic') {
       timeline: timeline
     };
   } catch (err) {
-    console.error(err);
-    alert(`파일 파싱 오류: ${err.message}`);
+    console.error('.haptic 파싱 실패:', err);
     return null;
   }
 }
@@ -444,9 +443,12 @@ function initDynamicHapticPipeline() {
       container.appendChild(btn);
     }
 
-    // 3) .haptic 파일 비동기 fetch 로드 (haptics/ 상대 폴더 경로 적용)
+    // 3) .haptic 파일 비동기 fetch 로드 (public/haptics/ 경로에서 로드)
     fetch(`./haptics/${fileName}`)
-      .then(res => res.text())
+      .then(res => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.text();
+      })
       .then(text => {
         const clip = parseMetaHapticFile(text, fileName);
         if (clip) {
