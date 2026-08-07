@@ -444,8 +444,8 @@ function initDynamicHapticPipeline() {
       container.appendChild(btn);
     }
 
-    // 3) .haptic 파일 비동기 fetch 로드 (haptics/ 하위 폴더 경로 적용)
-    fetch(`/haptics/${fileName}`)
+    // 3) .haptic 파일 비동기 fetch 로드 (haptics/ 상대 폴더 경로 적용)
+    fetch(`./haptics/${fileName}`)
       .then(res => res.text())
       .then(text => {
         const clip = parseMetaHapticFile(text, fileName);
