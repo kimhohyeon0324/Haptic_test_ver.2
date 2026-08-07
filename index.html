@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Meta .haptic File WebXR Player</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+    <style>
+      :root {
+        --bg-dark: rgba(13, 14, 24, 0.85);
+        --panel-border: rgba(157, 78, 221, 0.35);
+        --accent-purple: #9d4edd;
+        --accent-cyan: #00ffcc;
+        --accent-pink: #ff007f;
+        --text-bright: #f8f9fa;
+        --text-dim: #94a3b8;
+      }
+
+      * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+      body { background: #0a0b10; overflow: hidden; color: var(--text-bright); user-select: none; }
+      canvas { display: block; }
+
+      /* Top Header Banner */
+      #header {
+        position: fixed;
+        top: 15px;
+        left: 20px;
+        z-index: 100;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        background: var(--bg-dark);
+        border: 1px solid var(--panel-border);
+        padding: 10px 18px;
+        border-radius: 12px;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+      }
+      #header h1 { font-size: 16px; font-weight: 800; color: var(--accent-purple); letter-spacing: 0.05em; }
+      #header .badge {
+        background: rgba(157, 78, 221, 0.2);
+        color: var(--accent-purple);
+        font-size: 11px;
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-weight: 600;
+        border: 1px solid rgba(157, 78, 221, 0.4);
+      }
+
+      /* Dashboard Panel */
+      #dashboard {
+        position: fixed;
+        top: 75px;
+        left: 20px;
+        width: 380px;
+        z-index: 100;
+        background: var(--bg-dark);
+        border: 1px solid var(--panel-border);
+        border-radius: 16px;
+        padding: 20px;
+        backdrop-filter: blur(12px);
+        box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+        max-height: calc(100vh - 95px);
+        overflow-y: auto;
+      }
+
+      .section-title {
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--text-dim);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      /* File Dropzone */
+      #dropzone {
+        border: 2px dashed rgba(157, 78, 221, 0.5);
+        background: rgba(157, 78, 221, 0.08);
+        border-radius: 12px;
+        padding: 20px 15px;
+        text-align: center;
+        cursor: pointer;
+        transition: background 0.2s, border-color 0.2s;
+        margin-bottom: 16px;
+      }
+      #dropzone:hover, #dropzone.dragover {
+        background: rgba(157, 78, 221, 0.2);
+        border-color: var(--accent-purple);
+      }
+      #dropzone .icon { font-size: 28px; margin-bottom: 6px; }
+      #dropzone .text { font-size: 13px; font-weight: 600; color: var(--text-bright); }
+      #dropzone .subtext { font-size: 11px; color: var(--text-dim); margin-top: 4px; }
+      #file-input { display: none; }
+
+      /* File Info Card */
+      #file-card {
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 10px;
+        padding: 12px;
+        margin-bottom: 16px;
+        font-size: 12px;
+      }
+      #file-card .filename { font-weight: 700; color: var(--accent-cyan); word-break: break-all; margin-bottom: 4px; }
+      #file-card .meta { color: var(--text-dim); font-size: 11px; line-height: 1.5; }
+
+      /* Play Buttons */
+      .play-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-bottom: 16px;
+      }
+      .btn-play {
+        padding: 12px 14px;
+        border-radius: 10px;
+        border: none;
+        font-weight: 700;
+        font-size: 13px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: transform 0.15s, opacity 0.15s;
+      }
+      .btn-play:active { transform: scale(0.97); }
+      .btn-primary {
+        background: linear-gradient(135deg, #9d4edd, #7209b7);
+        color: white;
+        box-shadow: 0 4px 15px rgba(157,78,221,0.4);
+      }
+      .btn-sample1 {
+        background: linear-gradient(135deg, #ff3300, #ff6600);
+        color: white;
+      }
+      .btn-sample2 {
+        background: linear-gradient(135deg, #ffdd00, #ffaa00);
+        color: #111;
+      }
+
+      /* Canvas Waveform Container */
+      .canvas-container {
+        background: rgba(0, 0, 0, 0.4);
+        border: 1px solid rgba(157, 78, 221, 0.3);
+        border-radius: 10px;
+        padding: 8px;
+        margin-bottom: 16px;
+      }
+      #waveform-canvas { width: 100%; height: 90px; display: block; border-radius: 6px; }
+
+      /* VR Exit Button */
+      #exit-vr-btn {
+        display: none;
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 100;
+        padding: 10px 22px;
+        background: rgba(220, 40, 40, 0.85);
+        color: white;
+        font-size: 14px;
+        font-weight: 700;
+        border: 1px solid rgba(255,100,100,0.5);
+        border-radius: 12px;
+        cursor: pointer;
+        backdrop-filter: blur(8px);
+      }
+
+      /* QR Panel */
+      #qr-panel {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        z-index: 200;
+        background: rgba(13, 14, 24, 0.92);
+        border: 1.5px solid rgba(157, 78, 221, 0.4);
+        border-radius: 16px;
+        padding: 18px 20px 14px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        backdrop-filter: blur(12px);
+      }
+      #qr-panel .qr-title { font-size: 10px; font-weight: 700; color: var(--accent-purple); text-transform: uppercase; }
+      #qr-code-box { border-radius: 10px; overflow: hidden; border: 2px solid rgba(157, 78, 221, 0.3); }
+      #qr-url { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-dim); text-align: center; word-break: break-all; max-width: 160px; }
+      #qr-hint { font-size: 9px; color: rgba(157, 78, 221, 0.7); text-align: center; }
+      #qr-toggle {
+        position: fixed; bottom: 24px; right: 24px; z-index: 201;
+        background: rgba(157, 78, 221, 0.2); border: 1.5px solid rgba(157, 78, 221, 0.5);
+        color: var(--accent-purple); border-radius: 50%; width: 44px; height: 44px;
+        font-size: 20px; cursor: pointer; display: none; align-items: center; justify-content: center;
+      }
+    </style>
+    <script type="module" crossorigin src="./assets/index-BhBOHW-Y.js"></script>
+  </head>
+  <body>
+    <!-- Top Header Banner -->
+    <div id="header">
+      <h1>🥽 META .HAPTIC PLAYER</h1>
+      <span class="badge">WebXR File Player</span>
+    </div>
+
+    <!-- Dashboard Panel -->
+    <div id="dashboard">
+      <!-- File Dropzone -->
+      <div class="section-title">📁 메타 햅틱 파일 선택 (.haptic / .json)</div>
+      <div id="dropzone">
+        <div class="icon">📂</div>
+        <div class="text">Meta Haptics Studio 파일 선택 또는 드래그</div>
+        <div class="subtext">.haptic / .json 포맷 지원</div>
+        <input type="file" id="file-input" accept=".haptic,.json" />
+      </div>
+
+      <!-- Current File Card -->
+      <div id="file-card">
+        <div class="filename" id="lbl-filename">🎯 test_1.haptic (기본 로드됨)</div>
+        <div class="meta" id="lbl-filemeta">로딩 중... | Meta Studio 2.4.0 Format</div>
+      </div>
+
+      <!-- Play Buttons -->
+      <div class="section-title">▶ 햅틱 재생 컨트롤</div>
+      <div class="play-grid" id="dynamic-buttons-container">
+        <!-- JS에서 HAPTIC_FILES 에 가 적힌 파일들이 자동 생성됩니다 -->
+      </div>
+      <button class="btn-play btn-primary" id="btn-play-current" style="margin-top: 8px; width: 100%;">
+        ▶ [현재 선택된 파일] 햅틱 재생
+      </button>
+
+      <!-- Continuous Vibration Section -->
+      <div class="section-title" style="margin-top: 14px;">🌊 백그라운드 상시 진동 옵션</div>
+      <div class="play-grid" style="margin-bottom: 10px;">
+        <button class="btn-play" id="btn-toggle-continuous-1" style="background: linear-gradient(135deg, #2b1055, #7209b7); color: white;">
+          ⚡ 상시 1: 고정 [OFF]
+        </button>
+        <button class="btn-play" id="btn-toggle-continuous-2" style="background: linear-gradient(135deg, #2b1055, #7209b7); color: white;">
+          🌊 상시 2: 변동 [OFF]
+        </button>
+      </div>
+      <div style="background: rgba(255,255,255,0.04); padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08); margin-bottom: 16px;">
+        <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom: 6px;">
+          <span>상시 진동 세기:</span>
+          <span id="val-continuous-intensity" style="color: var(--accent-cyan); font-weight:700;">25%</span>
+        </div>
+        <input type="range" id="slider-continuous-intensity" min="5" max="100" value="25" style="width:100%; accent-color: var(--accent-purple);" />
+      </div>
+
+      <!-- Waveform Envelope Canvas -->
+      <div class="section-title">📈 진폭 포동 곡선 (Amplitude Envelope)</div>
+      <div class="canvas-container">
+        <canvas id="waveform-canvas" width="300" height="90"></canvas>
+      </div>
+    </div>
+
+    <!-- VR Exit Button -->
+    <button id="exit-vr-btn" onclick="window.__exitVR && window.__exitVR()">⏹ VR 세션 종료</button>
+
+  </body>
+</html>
