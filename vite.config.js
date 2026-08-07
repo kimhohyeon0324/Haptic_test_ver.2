@@ -33,6 +33,7 @@ function aiHapticLivePlugin() {
 }
 
 export default defineConfig({
+  base: './',
   plugins: [basicSsl(), aiHapticLivePlugin()],
   server: {
     https: true,
