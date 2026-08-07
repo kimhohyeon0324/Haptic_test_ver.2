@@ -4,6 +4,16 @@ WebXR 및 웹 환경에서 커스텀 햅틱 진동 패턴(`.haptic`)을 재생�
 
 ---
 
+## 🌐 데모 웹사이트 (다운로드 없이 즉시 실행)
+
+Meta Quest 전용 브라우저, 스마트폰, 또는 PC 웹 브라우저에서 아래 주소로 접속하시면 별도의 다운로드나 설치 없이 즉시 WebXR 햅틱 플레이어를 테스트하실 수 있습니다:
+
+🔗 **[https://kimhohyeon0324.github.io/Haptic_test/](https://kimhohyeon0324.github.io/Haptic_test/)**
+
+*(※ WebXR 햅틱 기능은 보안 규정상 HTTPS 주소인 위 데모 링크에서 정상 작동합니다.)*
+
+---
+
 ## 📂 프로젝트 구성
 
 본 프로젝트에는 플레이어 화면과 다음과 같은 8가지 산업용/알람 햅틱 진동 패턴 파일이 포함되어 있습니다:
@@ -19,26 +29,22 @@ WebXR 및 웹 환경에서 커스텀 햅틱 진동 패턴(`.haptic`)을 재생�
 
 ---
 
-## 🚀 프로젝트 실행 방법 (Getting Started)
+## 💻 로컬 개발 및 수정 방법 (Local Setup)
 
-이 프로젝트를 내 컴퓨터로 가져와서 실행하는 순서입니다.
+직접 코드를 수정하거나 로컬 환경에서 개발하고 싶은 경우의 실행 순서입니다.
 
-### 1. 프로젝트 다운로드 (Clone or Download)
-저장소를 클론하거나 ZIP 파일로 다운로드하여 압축을 풉니다.
+### 1. 프로젝트 다운로드 (Clone)
 ```bash
 git clone https://github.com/kimhohyeon0324/Haptic_test.git
 cd Haptic_test
 ```
 
 ### 2. 필요한 라이브러리 설치 (Install)
-터미널을 열고 아래 명령어로 실행 패키지를 설치합니다:
 ```bash
 npm install
 ```
 
 ### 3. 플레이어 실행 (Run)
-아래 명령어로 로컬 개발 서버를 실행합니다:
 ```bash
 npm run dev
 ```
-터미널에 출력되는 로컬 주소(예: `http://localhost:5173`)를 클릭하거나 웹 브라우저 주소창에 입력하여 접속합니다.
