@@ -3,49 +3,6 @@ import { VRButton } from 'three/addons/webxr/VRButton.js';
 import { XRControllerModelFactory } from 'three/addons/webxr/XRControllerModelFactory.js';
 
 // ─────────────────────────────────────────────
-// 0. QR 코드 및 UI 초기화
-// ─────────────────────────────────────────────
-window.addEventListener('load', () => {
-  const url = window.location.href;
-  const urlEl = document.getElementById('qr-url');
-  const boxEl = document.getElementById('qr-code-box');
-  const panel = document.getElementById('qr-panel');
-  const toggle = document.getElementById('qr-toggle');
-
-  if (urlEl) urlEl.textContent = url;
-
-  if (boxEl && typeof QRCode !== 'undefined') {
-    new QRCode(boxEl, {
-      text: url,
-      width: 160,
-      height: 160,
-      colorDark: '#9d4edd',
-      colorLight: '#0d0e18',
-      correctLevel: QRCode.CorrectLevel.M,
-    });
-  } else if (boxEl) {
-    boxEl.innerHTML = `<div style="width:160px;height:40px;display:flex;align-items:center;justify-content:center;font-size:11px;color:#94a3b8;padding:8px;text-align:center">위 주소를 직접 입력</div>`;
-  }
-
-  if (panel && toggle) {
-    toggle.style.display = 'none';
-
-    panel.addEventListener('click', () => {
-      panel.style.opacity = '0';
-      panel.style.transform = 'scale(0.8)';
-      panel.style.pointerEvents = 'none';
-      setTimeout(() => { panel.style.display = 'none'; }, 300);
-      toggle.style.display = 'flex';
-    });
-
-    toggle.addEventListener('click', () => {
-      panel.style.display = 'flex';
-      requestAnimationFrame(() => {
-        panel.style.opacity = '1';
-        panel.style.transform = 'scale(1)';
-        panel.style.pointerEvents = 'auto';
-      });
-      toggle.style.display = 'none';
     });
   }
 });
